@@ -361,7 +361,90 @@ Node* detect_cycle(LinkedList* ll) {
     return NULL;
 }  
 
+int is_sorted(LinkedList* ll) {
+    if (!ll->head) return -1;
 
+    Node *iter = ll->head;
+    while (iter->next) {
+        if (iter->data > iter->next->data)
+            return 0;
+        iter = iter->next;
+    }
+    return 1;
+}
+
+// Removes duplicates from linked list (O(n) time and O(1) spaces for sorted list, O(n^2) time and O(1) space for unsorted list)
+void remove_dupcliates(LinkedList* ll){
+    if (is_sorted(ll)) {
+        Node* iter = ll->head;
+        while (iter && iter->next) {
+            if (iter->data == iter->next->data) {
+                Node* temp = iter->next->next;
+                free(iter->next);
+                iter->next = temp;
+                ll->length--;
+                continue;
+            }
+            iter = iter->next;
+        }
+    } else {
+        Node* curr = ll->head;
+        Node* iter = ll->head;
+        while (curr && curr->next) {
+            iter = curr;
+            while (iter && iter->next) {
+                if (iter->next->data == curr->data)
+                {
+                    Node* temp = iter->next;
+                    iter->next = temp->next;
+                    free(temp);
+                    ll->length--;
+                }
+                iter = iter->next;
+            }
+            curr = curr->next;
+        }
+    }
+}
+
+// Splitting linked list from the middle (O(n / 2) time, O(1) space)
+Node* split_at_middle(LinkedList* ll) {
+    if (!ll->head) return NULL;
+
+    Node* slow = ll->head;
+    Node* fast = ll->head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    Node* other_head = slow->next;
+    slow->next = NULL;
+    ll->tail = slow;
+    return other_head;
+}
+
+int* to_array(LinkedList* ll) {
+    if (!ll->head) return NULL;
+
+    int* arr = (int*)malloc(sizeof(int) * ll->length);
+    Node* iter = ll->head;
+    int i = 0;
+    while(iter) {
+        arr[i] = iter->data;
+        iter = iter->next;
+        i++;
+    }
+    return arr;
+}
+
+LinkedList* from_array(int* arr, int size) {
+    LinkedList* ll;
+    init_list(&ll);
+    for (int i  = 0; i < size; i++) {
+        push_back(ll, arr[i]);
+    }
+    return ll;
+}
 
 void print_list(LinkedList* list) {
     if (!list) return;
@@ -370,12 +453,15 @@ void print_list(LinkedList* list) {
         printf("%d----->", iter->data);
         iter = iter->next;
     }
+    printf("\n");
     
 }
 
 int main() {
     LinkedList* ll;
+    LinkedList* ll2;
     init_list(&ll);
+    init_list(&ll2);
     push_back(ll, 42);
     push_back(ll, 24);
     push_back(ll, 12);
@@ -383,11 +469,11 @@ int main() {
     insert_at(ll, 102, 2);
     push_back(ll, 105);
     insert_sorted(ll, 110);
-    // Node* temp = ll->head;
-    // temp = temp->next;
-    // temp = temp->next;
-    // ll->tail->next = temp;
-    // printf("%d", detect_cycle(ll)->data);
-    print_list(ll);
-    // free_list(ll);
+    insert_at(ll, 42, 5);
+    insert_at(ll, 42, 3);
+    insert_at(ll, 110, 1);
+    insert_at(ll, 110, 0);
+
+    // print_list(ll);
+    // print_list(ll2);
 }
