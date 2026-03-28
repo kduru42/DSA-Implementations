@@ -129,6 +129,125 @@ void insert_sorted(LinkedList* ll, int val) {
     push_back(ll, val);
 }
 
+
+// DELETION
+
+void pop_front(LinkedList* ll) {
+    if (!ll->head) return;
+
+    if (!ll->head->next) {
+        free(ll->head);
+        ll->head = NULL;
+        ll->tail = NULL;
+    } else {
+        Node* temp = ll->head;
+        ll->head = ll->head->next;
+        ll->head->prev = NULL;
+        free(temp);
+    }
+    ll->length--;
+}
+
+void pop_back(LinkedList* ll) {
+    if (!ll->head) return;
+
+    if (!ll->head->next) {
+        free(ll->head);
+        ll->head = NULL;
+        ll->tail = NULL;
+    } else {
+        Node* temp = ll->tail;
+        ll->tail = ll->tail->prev;
+        ll->tail->next = NULL;
+        free(temp);
+    }
+    ll->length--;
+}
+
+void delete_at(LinkedList* ll, int index) {
+    if (!ll->head || index < 0 || index >= ll->length) return;
+
+    if (index == 0)
+        pop_front(ll);
+    else if (index == ll->length - 1)
+        pop_back(ll);
+    else {
+        int i = 0;
+        Node* iter;
+        if (index < ll->length / 2) {
+            iter = ll->head;
+            while (i++ < index)
+                iter = iter->next;
+        } else {
+            int i = ll->length - 1;
+            iter = ll->tail;
+            while (i-- > index)
+                iter = iter->prev;
+        }
+        iter->prev->next = iter->next;
+        iter->next->prev = iter->prev;
+        free(iter);
+        ll->length--;
+    }
+}
+
+void delete_value(LinkedList* ll, int val) {
+    if (!ll->head) return;
+
+    if (ll->head->data == val)
+        pop_front(ll);
+    else {
+        Node* iter = ll->head;
+        while(iter) {
+            if (iter->data == val) {
+                iter->prev->next = iter->next;
+                if (iter != ll->tail)
+                    iter->next->prev = iter->prev;
+                free(iter);
+                ll->length--;
+                return;
+            }
+            iter = iter->next;
+        }
+    }
+    
+}
+
+void delete_all_value(LinkedList* ll, int val) {
+    if (!ll->head) return;
+
+    Node* iter = ll->head;
+    while(iter) {
+        if (iter->data == val) {
+            if (iter == ll->head)
+                pop_front(ll);
+            else {
+                Node* temp = iter->next;
+                iter->prev->next = iter->next;
+                if (iter != ll->tail)
+                    iter->next->prev = iter->prev;
+                free(iter);
+                iter = temp;
+                continue;
+            }
+            ll->length--;
+        }
+        iter = iter->next;
+    }
+}
+
+void free_list(LinkedList* ll) {
+    if (!ll) return;
+
+    Node* iter = ll->head;
+    while(iter) {
+        Node* temp = iter->next;
+        free(iter);
+        iter = temp;
+    }
+    free(ll);
+}
+
 void print_list(LinkedList* ll) {
     if (!ll->head) return;
 
@@ -152,7 +271,13 @@ int main()
     insert_at(ll, 48, 2);
     insert_after_value(ll, 79, 78);
     insert_sorted(ll, 100);
+    insert_at(ll, 48, 0);
+    insert_at(ll, 48, 6);
+
+    delete_all_value(ll, 48);
 
     print_list(ll);
+
+    free_list(ll);
 
 }
