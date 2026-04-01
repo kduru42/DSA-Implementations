@@ -32,6 +32,10 @@ void push_front(LinkedList* ll, int val) {
     n->prev = NULL;
     if (!ll->head)
         ll->tail = n;
+    else
+        ll->head->prev = n;
+
+
     ll->head = n;
     ll->length++;
 }
@@ -248,6 +252,117 @@ void free_list(LinkedList* ll) {
     free(ll);
 }
 
+// SEARCH & ACCESS
+
+Node* find(LinkedList* ll, int val) {
+    if (!ll->head) return NULL;
+
+    Node* iter = ll->head;
+    while(iter) {
+        if (iter->data == val)
+            return iter;
+        iter = iter->next;
+    }
+    return NULL;
+}
+
+Node* get_at(LinkedList* ll, int index) {
+    if (!ll->head || index < 0 || index >= ll->length) return NULL;
+
+    if (index == 0)
+        return ll->head;
+    else if (index == ll->length - 1)
+        return ll->tail;
+    else {
+        Node* iter;
+        int i;
+        if (index < ll->length / 2) {
+            iter = ll->head;
+            i = 0;
+            while (i++ < index)
+                iter = iter->next;
+        } else {
+            iter = ll->tail;
+            i = ll->length - 1;
+            while (i-- > index)
+                iter = iter->prev;
+        }
+        return iter;
+    }
+    return NULL;
+}
+
+Node* get_nth_from_end(LinkedList* ll, int index) {
+    if (!ll->head || index < 0 || index >= ll->length) return NULL;
+
+    if (index == 0)
+        return ll->tail;
+    else if (index == ll->length - 1)
+        return ll->head;
+    else {
+        Node* iter = ll->tail;
+        int i = ll->length - 1;
+        int real_index = ll->length - index - 1;
+        while (i-- > real_index)
+            iter = iter->prev;
+        return iter;
+    }
+    return NULL;
+}
+
+// ALGORITHMS
+
+void reverse(LinkedList* ll) {
+    if (!ll->head) return;
+
+    Node* temp = NULL;
+    Node* iter = ll->head;
+    ll->head = ll->tail;
+    ll->tail = iter;
+    while (iter) {
+        temp = iter->next;
+        iter->next = iter->prev;
+        iter->prev = temp;
+        iter = temp;
+    }
+}
+
+Node* mergeSort(Node* l, Node* r) {
+    if (!l) return r;
+    if (!r) return l;
+
+    Node* result;
+    if (l->data <= r->data) {
+        result = l;
+        result->next = mergeSort(l->next, r);
+    } else {
+        result = r;
+        result->next = mergeSort(r->next, l);
+    }
+    return result;
+}
+
+Node* sort(Node* head) {
+    if (!head || !head->next) return NULL;
+
+    Node* slow = head;
+    Node* fast = head->next;
+
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    Node* middle = slow;
+    Node* left = head;
+    Node* right = slow->next;
+    slow->next = NULL;
+    right->prev = NULL;
+
+    sort(left);
+    sort(right);
+    return mergeSort(left, right);
+}
+
 void print_list(LinkedList* ll) {
     if (!ll->head) return;
 
@@ -258,6 +373,8 @@ void print_list(LinkedList* ll) {
     }
     printf("\n");
 }
+
+
 
 int main() 
 {
@@ -273,8 +390,7 @@ int main()
     insert_sorted(ll, 100);
     insert_at(ll, 48, 0);
     insert_at(ll, 48, 6);
-
-    delete_all_value(ll, 48);
+    ll->head = sort(ll->head);
 
     print_list(ll);
 
